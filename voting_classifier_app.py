@@ -25,14 +25,13 @@ def plot_decision_boundary(clf, X, y, ax):
     ax.set_xticks([])
     ax.set_yticks([])
 
-st.set_page_config(page_title="Ensemble Lab", layout="wide")
+st.set_page_config(page_title="Voting Classifier Lab", layout="wide")
 st.title("🗳️ Advanced Voting Classifier Visualizer")
 
 # --- SIDEBAR ---
 st.sidebar.header("1. Dataset Settings")
-# Added U-Shape, XOR, and Blobs
 ds_type = st.sidebar.selectbox("Select Dataset", 
-    ("U-Shape", "XOR (Cross)", "Moons", "Circles", "Linearly Separable", "Blobs"))
+    ("Concentric Circles", "U-Shape", "XOR (Cross)", "Moons", "Linearly Separable", "Blobs"))
 noise = st.sidebar.slider("Noise Level", 0.0, 1.0, 0.2)
 
 st.sidebar.header("2. Choose Estimators")
@@ -52,20 +51,18 @@ voting_type = st.sidebar.radio("Voting Type", ("hard", "soft"))
 
 # --- DATA GENERATION ---
 n_samples = 300
-if ds_type == "U-Shape":
-    # Creating a U-shape by manipulating Moons data
+if ds_type == "Concentric Circles":
+    X, y = make_circles(n_samples=n_samples, noise=noise, factor=0.3, random_state=42)
+elif ds_type == "U-Shape":
     X, y = make_moons(n_samples=n_samples, noise=noise, random_state=42)
-    X[y == 1] *= [1.5, -1.5] # Stretch and flip one class to create a deep U
+    X[y == 1] *= [1.5, -1.5] 
 elif ds_type == "XOR (Cross)":
     rng = np.random.RandomState(42)
     X = rng.randn(n_samples, 2)
     y = np.logical_xor(X[:, 0] > 0, X[:, 1] > 0).astype(int)
-    # Add noise
     X += rng.normal(size=X.shape) * noise
 elif ds_type == "Moons":
     X, y = make_moons(n_samples=n_samples, noise=noise, random_state=42)
-elif ds_type == "Circles":
-    X, y = make_circles(n_samples=n_samples, noise=noise, factor=0.5, random_state=42)
 elif ds_type == "Blobs":
     X, y = make_blobs(n_samples=n_samples, centers=2, cluster_std=noise*3, random_state=42)
 else:
@@ -103,8 +100,8 @@ if st.sidebar.button("Run Algorithm"):
             st.write(f"**Final: {vc_acc:.2%}**")
 
         st.divider()
-        st.subheader("Comparison Table")
+        st.subheader("📊 Comparison Table")
         st.table({"Model": list(scores.keys()) + ["VOTING (COMBINED)"], 
-                  "Accuracy": [f"{v:.2%}" for v in scores.values()] + [f"{vc_acc:.2%}"]})
+                  "Accuracy Score": [f"{v:.2%}" for v in scores.values()] + [f"{vc_acc:.2%}"]})
 else:
-    st.info("👈 Choose 'U-Shape' or 'XOR' and click 'Run Algorithm' to see how Voting improves accuracy!")
+    st.info("👈 Set parameters and click 'Run Algorithm'")
